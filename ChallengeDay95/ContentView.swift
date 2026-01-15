@@ -14,9 +14,6 @@ struct ContentView: View {
         Button("Tap Me") {
             count += 1
         }
-        .onLongPressGesture {
-            count += 10
-        }
     }
 }
 
