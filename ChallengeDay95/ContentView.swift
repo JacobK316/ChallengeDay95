@@ -14,6 +14,7 @@ struct ContentView: View {
         Button("Tap Me") {
             count += 1
         }
+        Text("Hello")
     }
 }
 
