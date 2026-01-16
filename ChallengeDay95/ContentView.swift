@@ -5,9 +5,12 @@
 //  Created by Jacob Kappler on 1/15/26.
 //
 
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.modelContext) var modelContext
+    
     let sidesChoices = [4, 6, 8, 10, 12, 20, 50]
     @State private var sides = 6
     @State private var diceTotal = 0
@@ -31,21 +34,30 @@ struct ContentView: View {
                 
                 Text("Total: \(diceTotal)")
                 
-                ForEach(rolls, id: \.self) { roll in
-                    Text("Role: \(roll)")
+                ForEach(Array(rolls.enumerated()), id: \.element) { number, roll in
+                    Text("Dice \(number + 1): \(roll)")
+                }
+            }
+            .toolbar {
+                NavigationLink("Rolls") {
+                    RollHistoryView()
                 }
             }
         }
     }
     
     func rollDice() {
+        rolls.removeAll()
         var total = 0
         for _ in 0..<amountOfDice {
             let roll = Int.random(in: 1...sides)
             total += roll
+            rolls.append(roll)
         }
-        
         diceTotal = total
+
+        let newRoll = Roll(sides: sides, diceTotal: diceTotal, amountOfDice: amountOfDice, rolls: rolls)
+        modelContext.insert(newRoll)
     }
 }
 
