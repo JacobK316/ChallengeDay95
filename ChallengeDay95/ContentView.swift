@@ -16,6 +16,11 @@ struct ContentView: View {
     @State private var diceTotal = 0
     @State private var rolls = [Int]()
     @State private var amountOfDice = 2
+    
+    @State private var flickTime = 1.0
+    @State private var isFlicking = false
+    
+    let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     var body: some View {
         NavigationStack {
             Form {
@@ -30,7 +35,9 @@ struct ContentView: View {
                     }
                 }
                 
-                Button("Role Dice", action: rollDice)
+                Button("Role Dice") {
+                    isFlicking.toggle()
+                }
                 
                 Text("Total: \(diceTotal)")
                 
@@ -41,6 +48,17 @@ struct ContentView: View {
             .toolbar {
                 NavigationLink("Rolls") {
                     RollHistoryView()
+                }
+            }
+            .onReceive(timer) { time in
+                guard isFlicking else { return }
+                if flickTime > 0 {
+                    flickTime -= 0.1
+                    rollFakeDice()
+                } else {
+                    timer.upstream.connect().cancel()
+                    flickTime = 1.0
+                    rollDice()
                 }
             }
         }
@@ -58,6 +76,14 @@ struct ContentView: View {
 
         let newRoll = Roll(sides: sides, diceTotal: diceTotal, amountOfDice: amountOfDice, rolls: rolls)
         modelContext.insert(newRoll)
+    }
+    func rollFakeDice() {
+        var total = 0
+        for _ in 0..<amountOfDice {
+            let roll = Int.random(in: 1...sides)
+            total += roll
+        }
+        diceTotal = total
     }
 }
 
