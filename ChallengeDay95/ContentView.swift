@@ -36,6 +36,7 @@ struct ContentView: View {
                 }
                 
                 Button("Role Dice") {
+                    guard !isFlicking else { return }
                     isFlicking.toggle()
                 }
                 
@@ -54,36 +55,34 @@ struct ContentView: View {
                 guard isFlicking else { return }
                 if flickTime > 0 {
                     flickTime -= 0.1
-                    rollFakeDice()
+                    rollDice(store: false)
                 } else {
-                    timer.upstream.connect().cancel()
+                    isFlicking = false
                     flickTime = 1.0
-                    rollDice()
+                    rollDice(store: true)
                 }
             }
         }
     }
     
-    func rollDice() {
-        rolls.removeAll()
+    func rollDice(store: Bool) {
+        if !store {
+            rolls.removeAll()
+        }
         var total = 0
         for _ in 0..<amountOfDice {
             let roll = Int.random(in: 1...sides)
             total += roll
-            rolls.append(roll)
+            if store {
+                rolls.append(roll)
+            }
         }
         diceTotal = total
-
-        let newRoll = Roll(sides: sides, diceTotal: diceTotal, amountOfDice: amountOfDice, rolls: rolls)
-        modelContext.insert(newRoll)
-    }
-    func rollFakeDice() {
-        var total = 0
-        for _ in 0..<amountOfDice {
-            let roll = Int.random(in: 1...sides)
-            total += roll
+        
+        if store {
+            let newRoll = Roll(sides: sides, diceTotal: diceTotal, amountOfDice: amountOfDice, rolls: rolls)
+            modelContext.insert(newRoll)
         }
-        diceTotal = total
     }
 }
 

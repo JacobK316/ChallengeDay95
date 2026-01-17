@@ -9,7 +9,8 @@ import SwiftData
 import SwiftUI
 
 struct RollHistoryView: View {
-    @Query(sort: \Roll.sides, order: .reverse) var diceRolls: [Roll]
+    @Environment(\.modelContext) var modelContext
+    @Query(sort: \Roll.amountOfDice, order: .reverse) var diceRolls: [Roll]
     var body: some View {
         NavigationStack {
             List {
@@ -33,7 +34,18 @@ struct RollHistoryView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                .onDelete(perform: deleteRoll)
             }
+            .toolbar {
+                EditButton()
+            }
+        }
+    }
+    
+    func deleteRoll(at offsets: IndexSet) {
+        for offset in offsets {
+            let roll = diceRolls[offset]
+            modelContext.delete(roll)
         }
     }
 }
